@@ -32,7 +32,7 @@ onMounted(() => {
   timer = setInterval(() => {
     currentIndex = (currentIndex + 1) % placeholders.length
     currentPlaceholder.value = placeholders[currentIndex]
-  }, 3000) // 3초마다 문구 순환
+  }, 3000)
 })
 
 onUnmounted(() => {
@@ -47,46 +47,55 @@ const goToChatBot = () => {
 <style scoped>
 .search-container {
   width: 100%;
-  max-width: 600px;
-  margin: 20px auto;
 }
+
 .search-box {
   display: flex;
   align-items: center;
-  background: #f1f3f4;
-  border-radius: 30px;
-  padding: 8px 16px;
-  border: 1px solid #e0e0e0;
+  /* 안쪽으로 쏙 들어간 느낌의 뉴모피즘 검색창 */
+  background: #f0f3f6;
+  border-radius: 20px;
+  padding: 12px 18px;
+  border: none;
+  box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
-.search-box:hover {
-  box-shadow: 0 1px 6px rgba(32,33,36,0.28);
-  background: #ffffff;
-}
+
 .search-icon {
-  margin-right: 10px;
+  margin-right: 12px;
   font-size: 1.1rem;
+  color: #a0aec0;
 }
+
 .search-input {
   border: none;
   background: transparent;
   outline: none;
   width: 100%;
-  font-size: 1rem;
-  color: #3c4043;
+  font-size: 0.95rem;
+  color: #4a5568;
   cursor: pointer;
+  font-weight: 500;
 }
+
+.search-input::placeholder {
+  color: #718096;
+}
+
 .search-btn {
   background: #1a73e8;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 8px 18px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
   white-space: nowrap;
+  box-shadow: 2px 2px 5px rgba(26, 115, 232, 0.25);
+  transition: background 0.2s;
 }
+
 .search-btn:hover {
   background: #1557b0;
 }
