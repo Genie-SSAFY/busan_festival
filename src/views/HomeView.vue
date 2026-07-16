@@ -48,31 +48,32 @@
 
       <!-- 하단 영역: 폰트 1.2배 확대 및 기존보다 10% 더 상단으로 밀어올린 축제 카드 섹션 -->
       <section class="festival-section">
-        <!-- 1. 폰트 크기 1.2배 상향 적용 완료 -->
         <h2 class="festival-section-title">✨ 지금 주목받는 부산 축제</h2>
         <div class="festival-grid">
           
-          <!-- 축제 카드 1 -->
-          <div class="festival-card glass-panel text-gray-border">
-            <div class="card-image-placeholder">🌊 FESTIVAL IMAGE 01</div>
-            <div class="card-info">
-              <div class="card-title-row">
-                <h3>부산 락 페스티벌</h3>
-                <span class="date-tag">D-7</span>
-              </div>
-              <p class="desc">삼락생태공원을 뜨겁게 달굴 음악의 향연</p>
+          <!-- 축제 카드 반복 구간 (일정 정보 태그 제거 및 데이터 연동) -->
+          <div 
+            v-for="(festival, index) in selectedFestivals" 
+            :key="festival.contentid || index" 
+            class="festival-card glass-panel text-gray-border"
+          >
+            <!-- 축제 이미지 (데이터에 firstimage가 있으면 표시, 없으면 플레이스홀더) -->
+            <div class="card-image-placeholder">
+              <img 
+                v-if="festival.firstimage" 
+                :src="festival.firstimage" 
+                :alt="festival.title" 
+                class="festival-img"
+              />
+              <span v-else>🌊 {{ festival.title }}</span>
             </div>
-          </div>
-          
-          <!-- 축제 카드 2 -->
-          <div class="festival-card glass-panel text-gray-border">
-            <div class="card-image-placeholder">🎆 FESTIVAL IMAGE 02</div>
+            
             <div class="card-info">
               <div class="card-title-row">
-                <h3>광안리 M 드론 라이트쇼</h3>
-                <span class="date-tag">이번 주말</span>
+                <h3>{{ festival.title }}</h3>
+                <!-- D-Tag 영역 요청에 따라 삭제 완료 -->
               </div>
-              <p class="desc">매주 토요일 밤 펼쳐지는 드론 드로잉</p>
+              <p class="desc">{{ festival.addr1 || '부산광역시 일원' }}</p>
             </div>
           </div>
 
@@ -84,10 +85,106 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ChatBotSearch from '../components/ChatBotSearch.vue'
 
 const router = useRouter()
+const selectedFestivals = ref([])
+
+// 실제 활용하실 JSON 데이터 형태 매핑
+const festivalData = {
+  "region": "부산",
+  "contentType": "축제공연행사",
+  "contentTypeId": 15,
+  "total": 72,
+  "items": [
+    { "addr1": "부산광역시 해운대구 APEC로 55 (우동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/92/4077792_image2_1.jpg", "title": "2026 부산국제불교박람회", "contentid": "2644679" },
+    { "addr1": "부산광역시 수영구 광안해변로 219 (광안동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/41/4065341_image2_1.jpg", "title": "2026 나이트레이스 인 부산", "contentid": "3498395" },
+    { "addr1": "부산광역시 해운대구 APEC로 55 (우동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/57/4077757_image2_1.jpg", "title": "제48차 유네스코 세계유산위원회 특별공연 산화비 : HEXAGRAM 22", "contentid": "4077756" },
+    { "addr1": "부산광역시 사상구 삼락동", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/06/4040606_image2_1.jpg", "title": "부산국제록페스티벌", "contentid": "140799" },
+    { "addr1": "부산광역시 동구 이순신대로 164 (초량동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/70/4058670_image2_1.jpg", "title": "부산항축제", "contentid": "1007868" },
+    { "addr1": "부산광역시 수영구 광안해변로 219 (광안동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/10/4066810_image2_1.JPG", "title": "광안리어방축제", "contentid": "506545" },
+    { "addr1": "부산광역시 해운대구 수영강변대로 85 (우동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/37/4069137_image2_1.jpg", "title": "2026 부산나이트워크42K", "contentid": "2991394" },
+    { "addr1": "부산광역시 수영구 민락동 110-19", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/73/4070173_image2_1.jpg", "title": "2026 부산바다도서관", "contentid": "3497353" },
+    { "addr1": "부산광역시 중구 용두산길 37-55 (광복동2가)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/73/4067473_image2_1.jpg", "title": "2026 용골 댄스 페스타", "contentid": "2952109" },
+    { "addr1": "부산광역시 해운대구 APEC로 55 (우동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/26/4055726_image2_1.jpeg", "title": "세계유산위원회 대한민국관(K-Heritage House)", "contentid": "4055637" },
+    { "addr1": "부산광역시 북구 덕천동 763", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/30/4054930_image2_1.jpg", "title": "부산 밀 페스티벌", "contentid": "3303393" },
+    { "addr1": "부산광역시 중구 중앙동4가", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/81/4065381_image2_1.jpg", "title": "포트빌리지 부산 2026", "contentid": "3485135" },
+    { "addr1": "부산광역시 해운대구 수영강변대로 120 (우동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/90/4065290_image2_1.jpg", "title": "2026 부산푸드필름페스타", "contentid": "2719122" },
+    { "addr1": "부산광역시 해운대구 수영강변대로 120 (우동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/20/4064420_image2_1.jpg", "title": "부산국제매직페스티벌", "contentid": "1032770" },
+    { "addr1": "부산광역시 영도구 해양로301번길 55", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/73/4060873_image2_1.jpg", "title": "글로벌 영도커피페스티벌", "contentid": "2841074" },
+    { "addr1": "부산광역시 부산진구 시민공원로 73 (범전동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/63/4063563_image2_1.jpg", "title": "부산가족축제", "contentid": "2818494" },
+    { "addr1": "부산광역시 해운대구 해운대해변로 280 (중동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/55/4025555_image2_1.jpg", "title": "해운대 모래축제", "contentid": "566822" },
+    { "addr1": "부산광역시 해운대구 수영강변대로 120 (우동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/84/4057984_image2_1.png", "title": "국제해양영화제 (KIOFF)", "contentid": "2661307" },
+    { "addr1": "부산광역시 부산진구 시민공원로 73 (범전동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/90/4056890_image2_1.png", "title": "제6회 부산 봄꽃 전시회", "contentid": "4056794" },
+    { "addr1": "부산광역시 중구 광복중앙로 13 (신창동1가)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/00/4061800_image2_1.JPG", "title": "작당페스타", "contentid": "3115722" },
+    { "addr1": "부산광역시 부산진구 동성로112번길 121-1", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/31/4054831_image2_1.jpg", "title": "부산연등회", "contentid": "1553601" },
+    { "addr1": "부산광역시 기장군 기장읍 기장해안로 605", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/20/4059220_image2_1.jpg", "title": "기장멸치축제", "contentid": "292977" },
+    { "addr1": "부산광역시 해운대구 APEC로 30 (우동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/66/4059066_image2_1.jpg", "title": "K-핸드메이드페어 부산 2026", "contentid": "2523149" },
+    { "addr1": "부산광역시 해운대구 APEC로 30 (우동)", "firstimage": "", "title": "K-일러스트레이션페어 부산 2026", "contentid": "2704473" },
+    { "addr1": "부산 강서구 대저1동 1-17", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/77/4046477_image2_1.JPG", "title": "강서 낙동강30리 벚꽃축제", "contentid": "2536122" },
+    { "addr1": "부산광역시 해운대구 APEC로 55 (우동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/42/4038942_image2_1.jpg", "title": "2026 대한민국 과학축제 with 부산과학축전", "contentid": "2740921" },
+    { "addr1": "부산광역시 영도구 해양로301번길 55 (동삼동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/41/4054241_image2_1.png", "title": "구룡마을 벚꽃축제", "contentid": "3359409" },
+    { "addr1": "부산광역시 연제구 세병로 84 (거제동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/55/4046355_image2_1.jpg", "title": "연제고분판타지축제", "contentid": "4046353" },
+    { "addr1": "부산광역시 사상구 사상로223번길 40 (괘법동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/14/4041614_image2_1.jpg", "title": "사상 가로공원 벚꽃야장(野/夜) 페스티벌", "contentid": "4041281" },
+    { "addr1": "부산광역시 강서구 대저1동", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/62/4041162_image2_1.jpg", "title": "제22회 부산도시농업박람회", "contentid": "1907888" },
+    { "addr1": "부산광역시 동구 충장대로 206 (초량동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/79/4039679_image2_1.jpg", "title": "제14회 부산국제항만컨퍼런스", "contentid": "4033328" },
+    { "addr1": "부산광역시 동래구 문화로 80 (명륜동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/43/3366443_image2_1.jpg", "title": "동래읍성역사축제", "contentid": "229048" },
+    { "addr1": "부산광역시 금정구 장전온천천로 48 (장전동)", "firstimage": "https://tong.visitkorea.or.kr/cms/resource/40/4008540_image2_1.jpg", "title": "라라라 페스티벌", "contentid": "2484237" },
+    { "addr1": "부산광역시 수영구 광안해변로 219 (광안동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/12/3518612_image2_1.jpeg", "title": "광안리 M(Marvelous) 드론 라이트쇼", "contentid": "2786391" },
+    { "addr1": "부산광역시 해운대구 해운대해변로 280 (중동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/12/3576412_image2_1.jpg", "title": "해운대 빛축제", "contentid": "2048902" },
+    { "addr1": "부산광역시 수영구 광안해변로 219 (광안동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/64/3579164_image2_1.png", "title": "카운트다운 부산", "contentid": "2702333" },
+    { "addr1": "부산광역시 해운대구 수영강변대로 120 (우동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/78/3569778_image2_1.jpg", "title": "크리스마스 빌리지 부산 2025", "contentid": "3437916" },
+    { "addr1": "부산광역시 수영구 광남로 96 (광안동, 광안 포디움프레스티지 1)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/58/3579258_image2_1.jpg", "title": "게임 체험 팝업 전시 ‘Game-Playground’", "contentid": "3422647" },
+    { "addr1": "부산광역시 해운대구 APEC로 55 (우동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/25/3536625_image2_1.jpg", "title": "부산국제아동도서전", "contentid": "3345610" },
+    { "addr1": "부산광역시 중구 광복로 72-1 (광복동2가)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/05/3576405_image2_1.JPG", "title": "광복로 겨울빛 트리축제", "contentid": "3576410" },
+    { "addr1": "부산광역시 동래구 중앙대로 1324 (온천동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/72/3574272_image2_1.jpg", "title": "온천천 빛 축제", "contentid": "3434800" },
+    { "addr1": "부산광역시 영도구 해양로301번길 45 (동삼동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/90/3561790_image2_1.jpg", "title": "영도다리축제", "contentid": "1080734" },
+    { "addr1": "부산광역시 남구 유엔평화로76번길 1 (대연동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/43/3537143_image2_1.jpg", "title": "부산국제공연예술마켓", "contentid": "3006246" },
+    { "addr1": "부산광역시 중구 용두산길 37-30 (광복동2가)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/63/3559563_image2_1.jpg", "title": "부산중구반려동물축제", "contentid": "3559571" },
+    { "addr1": "부산광역시 서구 송도해변로 100 (암남동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/36/3547136_image2_1.jpg", "title": "부산고등어축제", "contentid": "1399532" },
+    { "addr1": "부산광역시 중구 광복로 72-1 (광복동2가)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/44/3556944_image2_1.png", "title": "부산 스트릿 페스타 인 광복", "contentid": "3556962" },
+    { "addr1": "부산광역시 수영구 민락로6번길 29 (민락동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/52/3555352_image2_1.png", "title": "옥토버페스타 인 광안리", "contentid": "3555363" },
+    { "addr1": "부산광역시 Basin구 시민공원로 73 (범전동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/71/3553771_image2_1.jpg", "title": "2025 영호남 전통시장 박람회", "contentid": "2868776" },
+    { "addr1": "부산광역시 중구 용미길9번길 6-45 (남포동1가)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/08/3550808_image2_1.jpg", "title": "유라리 건맥축제", "contentid": "3001170" },
+    { "addr1": "부산광역시 부산진구 시민공원로 73 (범전동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/47/3359047_image2_1.jpg", "title": "부산종합민속예술제", "contentid": "3016659" },
+    { "addr1": "부산광역시 부산진구 전포동", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/54/3549654_image2_1.png", "title": "전포커피축제", "contentid": "3018117" },
+    { "addr1": "부산광역시 금정구 남산로 27 (남산동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/48/3552448_image2_1.jpg", "title": "글로컬 문화 in(人) 남산 페스티벌", "contentid": "3020552" },
+    { "addr1": "부산광역시 기장군 일광읍 칠암리", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/29/3553829_image2_1.JPG", "title": "기장붕장어축제in칠암", "contentid": "2860868" },
+    { "addr1": "부산광역시 해운대구 수영강변대로 140 (우동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/04/3531704_image2_1.png", "title": "부산글로벌웹툰페스티벌", "contentid": "2873292" },
+    { "addr1": "부산광역시 사상구 삼락동", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/40/3539740_image2_1.png", "title": "사상강변축제", "contentid": "2032436" },
+    { "addr1": "부산광역시 금정구 장전온천천로 48 (장전동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/24/3534524_image2_1.jpg", "title": "부산국제공연예술제", "contentid": "2558735" },
+    { "addr1": "부산광역시 해운대구 APEC로 55 (우동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/53/3536453_image2_1.jpg", "title": "부산수제맥주마스터스챌린지", "contentid": "2856938" },
+    { "addr1": "부산광역시 해운대구 APEC로 55 (우동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/68/3533968_image2_1.jpg", "title": "페스티벌 시월", "contentid": "3370514" },
+    { "addr1": "부산광역시 서구 송도해변로 36 (암남동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/55/3532955_image2_1.jpg", "title": "부산 서구 의료관광축제", "contentid": "3532971" },
+    { "addr1": "부산광역시 중구 충장대로 26 (중앙동4가)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/60/3532060_image2_1.JPG", "title": "중구민의 날 페스타", "contentid": "3351515" },
+    { "addr1": "부산광역시 기장군 기장읍 동부산관광6로 59", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/93/3525493_image2_1.png", "title": "헬로메이커", "contentid": "2560161" },
+    { "addr1": "부산광역시 금정구 장전로12번길 55 (장전동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/62/3528962_image2_1.png", "title": "2025 부산세일페스타 부대앞으로", "contentid": "3528964" },
+    { "addr1": "부산광역시 사하구 몰운대1길 14 (다대동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/23/3524123_image2_1.jpg", "title": "2025 서부산 슈퍼어싱 페스티벌", "contentid": "3524130" },
+    { "addr1": "부산광역시 북구 생태공원길 270 (화명동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/89/3524089_image2_1.png", "title": "2025 별바다부산 나이트마켓", "contentid": "3356047" },
+    { "addr1": "부산광역시 영도구 해양로301번길 55 (동삼동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/09/3495409_image2_1.png", "title": "제2회 선원의날 한마음 걷기축제", "contentid": "3495410" },
+    { "addr1": "부산광역시 기장군 장안읍 임랑리", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/82/3516182_image2_1.png", "title": "기장임랑썸머뮤직페스티벌", "contentid": "2614130" },
+    { "addr1": "부산광역시 해운대구 수영강변대로 120 (우동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/10/3515310_image2_1.jpg", "title": "부산국제AI영화제", "contentid": "3515311" },
+    { "addr1": "부산광역시 사하구 다대동", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/21/2553821_image2_1.jpg", "title": "대한민국 국제해양레저위크(KIMA WEEK)", "contentid": "2019366" },
+    { "addr1": "부산광역시 해운대구 APEC로 55 (우동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/37/3510437_image2_1.jpg", "title": "부산인디커넥트페스티벌", "contentid": "2736033" },
+    { "addr1": "부산광역시 사하구 다대포 해수욕장", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/58/3504958_image2_1.jpg", "title": "부산바다축제", "contentid": "142080" },
+    { "addr1": "부산광역시 해운대구 수영강변대로 120 (우동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/85/3502985_image2_1.png", "title": "2025 부산여행영화제", "contentid": "2830695" },
+    { "addr1": "부산광역시 사하구 다대로 지하692 (다대동)", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/05/3502005_image2_1.jpg", "title": "다대포 선셋 영화 축제", "contentid": "3383748" }
+  ]
+}
+
+// 컴포넌트 마운트 시 전체 배열에서 무작위로 2개 추출하는 로직 적용
+onMounted(() => {
+  const items = festivalData.items
+  if (items && items.length >= 2) {
+    // 원본 데이터를 해치지 않기 위해 얕은 복사 후 셔플 진행
+    const shuffled = [...items].sort(() => 0.5 - Math.random())
+    selectedFestivals.value = shuffled.slice(0, 2)
+  } else {
+    selectedFestivals.value = items || []
+  }
+})
 
 const goToPage = (path) => {
   router.push(path)
@@ -330,14 +427,14 @@ const goToPage = (path) => {
   object-fit: contain;
 }
 
-/* 2. 하단 축제 카드 영역: 기존 위치(-240px)보다 10% 추가 상단화 적용 (-265px) */
+/* 하단 축제 카드 영역: 기존 위치(-240px)보다 10% 추가 상단화 적용 (-265px) */
 .festival-section {
   width: 100%;
   margin-top: -265px; 
   padding-bottom: 5px;
 }
 
-/* 1. 타이틀 폰트 크기 기존 1.25rem에서 1.2배 늘어난 1.5rem으로 고도화 */
+/* 타이틀 폰트 크기 기존 1.25rem에서 1.2배 늘어난 1.5rem으로 고도화 */
 .festival-section-title {
   font-size: 1.5rem;
   font-weight: 900;
@@ -362,7 +459,7 @@ const goToPage = (path) => {
   transform: translateY(-2px);
 }
 
-/* 280px 고유 카드 비율 유지 */
+/* 280px 고유 카드 비율 및 동적 이미지 삽입 스케일 조정 */
 .card-image-placeholder {
   width: 100%;
   height: 280px; 
@@ -375,6 +472,13 @@ const goToPage = (path) => {
   color: #64748b;
   font-size: 0.95rem;
   margin-bottom: 10px;
+  overflow: hidden; /* 이미지가 카드 모서리를 깎아내지 않도록 방지 */
+}
+
+.festival-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 이미지가 영역을 가득 채우도록 스타일링 */
 }
 
 .card-info {
@@ -397,20 +501,13 @@ const goToPage = (path) => {
   margin: 0;
 }
 
-.date-tag {
-  background: rgba(224, 242, 254, 0.9);
-  color: #0369a1;
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 6px;
-  white-space: nowrap;
-}
-
 .card-info .desc {
   font-size: 0.82rem;
   color: #475569;
   margin: 0;
   line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* 주소가 너무 길어질 경우 말줄임표 처리 */
 }
 </style>
